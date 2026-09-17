@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAST Transfer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #000000; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        
+        .card { background: #0a0a0c; border: 1px solid #1a1a1a; border-radius: 20px; padding: 35px 20px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        
+        /* FAST Fırçalı Logo Tasarımı */
+        .fast-logo { font-size: 55px; font-weight: 900; color: #ffffff; text-transform: uppercase; font-style: italic; letter-spacing: -3px; margin-bottom: 5px; line-height: 1; text-shadow: -3px 3px 0px rgba(255,255,255,0.1); }
+        .subtitle { color: #71717a; font-size: 13px; margin-bottom: 25px; }
+        
+        /* Bilgi Grupları */
+        .box { background: #121214; border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 10px; border: 1px solid #1c1c1f; }
+        .label { color: #52525b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .text { color: #ffffff; font-size: 16px; font-weight: 600; }
+        .iban { font-family: monospace; font-size: 14px; word-break: break-all; white-space: normal; line-height: 1.4; color: #e4e4e7; }
+        
+        /* Geniş ve Rahat Kopyalama Butonları */
+        .copy-btn { background: #ffffff; color: #000000; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 20px; transition: background 0.2s; }
+        .copy-btn:active { background: #cccccc; }
+        .copy-btn.success { background: #10b981; color: #ffffff; }
+        
+        /* Toast Bildirimi */
+        .toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #ffffff; color: #000000; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; transition: bottom 0.3s, opacity 0.3s; opacity: 0; pointer-events: none; z-index: 9999; }
+        .toast.show { bottom: 30px; opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="fast-logo">FAST</div>
+        <p class="subtitle">İstediğiniz bilgiyi ayrı ayrı kopyalayabilirsiniz.</p>
+
+        <!-- İsim Bölümü -->
+        <div class="box">
+            <span class="label">Alıcı</span>
+            <div class="text" id="name">Veysel Çin</div>
+        </div>
+        <button class="copy-btn" id="btn-name" onclick="kopyala('name', 'İsim Soyisim')">İsim Soyisim Kopyala</button>
+
+        <!-- IBAN Bölümü -->
+        <div class="box">
+            <span class="label">IBAN Numarası</span>
+            <div class="text iban" id="iban">TR17 0004 6008 0988 8000 1332 08</div>
+        </div>
+        <button class="copy-btn" id="btn-iban" onclick="kopyala('iban', 'IBAN Numarası')">IBAN'ı Kopyala</button>
+    </div>
+
+    <!-- Dinamik Bildirim Kutusu -->
+    <div id="toast" class="toast">Kopyalandı!</div>
+
+    <script>
+        function kopyala(elementId, labelName) {
+            var textToCopy = document.getElementById(elementId).innerText;
+            
+            // Banka uygulamalarında hata vermemesi için IBAN kopyalanırken boşluklar silinir
+            if (elementId === 'iban') {
+                textToCopy = textToCopy.replace(/\s/g, '');
+            }
+
+            // Her mobil tarayıcıda çalışan kesin kopyalama katmanı
+            var input = document.createElement('textarea');
+            input.value = textToCopy;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.select();
+            input.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.log('Hata');
+            }
+            
+            document.body.removeChild(input);
+
+            // Tıklanan butona özel başarı efekti
+            var btn = document.getElementById('btn-' + elementId);
+            var toast = document.getElementById('toast');
+            var originalText = btn.innerText;
+            
+            btn.className = "copy-btn success";
+            btn.innerText = "✓ Kopyalandı";
+            
+            toast.innerText = labelName + " başarıyla kopyalandı!";
+            toast.className = "toast show";
+
+            // 2 saniye sonra arayüzü eski haline döndürür
+            setTimeout(function() {
+                btn.className = "copy-btn";
+                btn.innerText = originalText;
+                toast.className = "toast";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
